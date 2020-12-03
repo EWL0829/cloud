@@ -1,0 +1,53 @@
+.left-panel {
+  padding: 0;
+  min-height: 100vh;
+  position: relative;
+}
+.left-panel .button-group {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.no-border {
+  border-radius: 0;
+}
+
+.edit-button {
+  background: none;
+  border: none;
+  color: inherit;
+  outline: none;
+}
+.edit-button:focus {
+  outline: none;
+}
+.icon-button {
+  background: none;
+  border: none;
+  color: inherit;
+  outline: none;
+  margin: 0 10px;
+}
+.icon-button:focus {
+  outline: none;
+}
+
+.file-search-wrap {
+  height: 64px;
+  margin-bottom: 0;
+}
+
+.flex-search-content {
+  height: 100%;
+}
+.c-link {
+  cursor: pointer;
+}
+.start-page {
+  font-size: 30px;
+  text-align: center;
+  padding-top: 50%;
+  color: #ccc;
+}
