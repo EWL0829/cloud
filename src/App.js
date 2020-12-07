@@ -2,32 +2,28 @@ import React, { useState } from 'react';
 import { faFileImport, faPlus } from '@fortawesome/free-solid-svg-icons';
 import SimpleMDE from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
+import { v4 as uuidv4 } from 'uuid';
 import FileSearch from "./components/FileSearch";
 import FileList from "./components/FileList";
 import defaultFiles from "./utils/defaultFiles";
 import BottomBtn from "./components/BottomBtn";
 import TabList from "./components/TabList";
+import { flattenArr, objToArr } from './utils/helper';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 function App() {
-    const [files, setFiles] = useState(defaultFiles); // 传递到列表中的fileList
+    const [files, setFiles] = useState(flattenArr(defaultFiles)); // 传递到列表中的fileList
     const [activeFileId, setActiveFileId] = useState(-1); // 当前处于编辑面板激活的文件，只有一个
     const [openedFileIDs, setOpenedFileIDs] = useState([]); // // 当前打开的文件，可能有多个，所以是数组
     const [unsavedFileIDs, setUnsavedFileIDs] = useState([]); // 未被保存的文件
     const [searchedFiles, setSearchedFiles] = useState([]); // 被搜索的数组，files数组被很多场景依赖，这里需要翻出抽取出来进行展示或者过滤
+    const filesArray = objToArr(files);
 
-    const openedFiles = openedFileIDs.map(openedId => {
-        return files.find(item => item.id === openedId);
-    });
-    const updateFileContent = (id, type, content) => {
-        const newFiles = files.map(file => {
-            if (file.id === id) {
-                file[type] = content;
-            }
-            return file;
-        });
-        setFiles(newFiles);
+    const updateFileContent = (id, updateProps) => {
+        const newFile = { ...files[id], ...updateProps };
+
+        setFiles({ ...files, [id]: newFile });
     };
     const fileClick = (id) => {
         // 1. 将激活的id设置为当前的id
@@ -53,13 +49,15 @@ function App() {
         }
     };
     const fileChange = (id, value) => { // 1. update the active file body // 2. update the unsavedFiles
-        updateFileContent(id, 'body', value);
+        updateFileContent(id, {
+            body: value
+        });
 
         if (!unsavedFileIDs.includes(id)) {
             setUnsavedFileIDs([...unsavedFileIDs, id]);
         }
     };
-    const activeFile = openedFiles.find(file => file.id === activeFileId);
+    const activeFile = files[activeFileId];
 
     const deleteFile = (id) => {
         const newFiles = files.filter(file => file.id !== id);
@@ -69,16 +67,38 @@ function App() {
     };
 
     const updateFileName = (id, title) => {
-        updateFileContent(id, 'title', title);
+        updateFileContent(id, {
+            title,
+            isNew: false
+        });
     };
 
     const fileSearch = (keyword) => {
         // filter out the new files based on the keyword
         // 如果这里的keyword输入为空，那么includes判断会判断files中每一个都含有空字符串，自然就会展示全量列表了
-        const newFiles = files.filter(file => file.title.includes(keyword));
+        const newFiles = filesArray.filter(file => file.title.includes(keyword));
+        console.log('newFiles', newFiles); // eslint-disable-line
         setSearchedFiles(newFiles);
     };
-    const fileListArr = searchedFiles.length > 0 ? searchedFiles : files;
+    // 当搜索的内容不为空的时候，就显示搜索列表否则显示默认的文件列表
+    // todo 体验优化的话最好在搜不到的时候添加一个toast提示，提醒用户没有对应的搜索结果
+    const fileListArr = searchedFiles.length > 0 ? searchedFiles : filesArray;
+    const openedFiles = openedFileIDs.map(openedId => {
+        return files[openedId];
+    });
+
+    const createNewFile = () => {
+        const newId = uuidv4();
+        const newFile = {
+            title: '新建文件',
+            id: newId,
+            body: '## 文件还是空的哦',
+            createAt: Date.now(),
+            isNew: true,
+        }
+        console.log({newFiles}); // eslint-disable-line
+        setFiles({ ...files, [newId]: newFile });
+    };
     return (
         <div className="App container-fluid px-0">
             <div className="row no-gutters">
@@ -107,7 +127,11 @@ function App() {
                         <div className="col">
                             <BottomBtn
                                 text="新建"
-                                icon={faPlus} colorClass="btn-primary"
+                                icon={faPlus}
+                                colorClass="btn-primary"
+                                onBtnClick={() => {
+                                    createNewFile();
+                                }}
                             />
                         </div>
                         <div className="col">

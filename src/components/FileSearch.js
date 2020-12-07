@@ -34,7 +34,9 @@ export default function FileSearch({ title, onFileSearch }) {
         if (isEscPressed && inputActive) {
             closeSearch();
         }
-    });
+        // 这里添加isEnterPressed以及isEscPressed的原因是只有在这两个值中有一个变化时才会执行一次这个搜索或者关闭搜索的操作
+        // 防止用户一直按住按键导致事件频繁触发
+    }, [isEnterPressed, isEscPressed]);
 
     useEffect(() => {
         if (inputActive) {
@@ -72,7 +74,12 @@ export default function FileSearch({ title, onFileSearch }) {
                                 ref={inputEl}
                                 // autoFocus={true}
                                 onChange={(e) => {
-                                    setValue(e.target.value);
+                                    const value = e.target.value;
+
+                                    if (value === '' || value === null || value === undefined) {
+                                        onFileSearch(value);
+                                    }
+                                    setValue(value);
                                 }}
                             />
                             <button

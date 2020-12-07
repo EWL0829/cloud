@@ -18,36 +18,54 @@ export default function FileList({ files, onFileClick, onSaveEdit, onFileDelete 
     const [ value, setValue ] = useState(''); // 当前正在编辑的列表项标题
     const isEnterPressed = useKeyPress(13);
     const isEscPressed = useKeyPress(27);
-    const closeSearch = () => {
+    const closeSearch = (curEditItem) => {
         setCurEditId(false);
         setValue('');
+
+        // 如果当前编辑的file是新增的file，当按下esc的时候直接删除该新增文件
+        if (curEditItem.isNew) {
+            onFileDelete(curEditItem.id);
+        }
     };
 
+    // 点击新建的时候需要更新当前正在编辑的文件id为新文件的id并且需要判断file的isNew属性值
+    // once files change, make the new added file current-change status;
     useEffect(() => {
-        if (isEnterPressed && curEditId) {
-            const curEditItem = files.find(item => item.id === curEditId);
+        const newFile = files.find(file => file.isNew);
+
+        if (newFile) {
+            setCurEditId(newFile.id);
+        }
+    }, [files]);
+
+    useEffect(() => {
+        const curEditItem = files.find(item => item.id === curEditId);
+
+        // 添加trim的原因在于空值不允许保存
+        if (isEnterPressed && curEditId && value.trim() !== '') {
             onSaveEdit(curEditItem.id, value);
             setCurEditId(''); // 将当前修改项改回默认值，离开编辑状态
+            setValue(''); // 将输入框内的内容改为空值
         }
 
         if (isEscPressed && curEditId) {
-            closeSearch();
+            closeSearch(curEditItem);
         }
         // deps里面如果没有传入依赖的话就会有warning
     }, [isEnterPressed, curEditId, isEscPressed, files, onSaveEdit, value]);
+
     return (
         <ul className="list-group list-group-flush file-list-wrap">
             {
                 files.map(file => {
-                    const { id, title } = file;
-                    console.log('id', id, files); // eslint-disable-line
+                    const { id, title, isNew } = file;
                     return (
                         <li
                             className="list-group-item mx-0 row bg-light d-flex flex-nowrap align-items-center file-list-item"
                             key={id}
                         >
                             {
-                                curEditId !== id ? <>
+                                (curEditId !== id || !isNew) ? <>
                                     <span className="col-2">
                                 <FontAwesomeIcon
                                     icon={faMarkdown}
@@ -85,7 +103,8 @@ export default function FileList({ files, onFileClick, onSaveEdit, onFileDelete 
                                         type="text"
                                         className="form-control col-10"
                                         value={value}
-                                        // autoFocus={true}
+                                        autoFocus={true}
+                                        placeholder={isNew && '请输入标题'}
                                         onChange={(e) => {
                                             setValue(e.target.value);
                                         }}
@@ -93,7 +112,9 @@ export default function FileList({ files, onFileClick, onSaveEdit, onFileDelete 
                                     <button
                                         type="button"
                                         className="icon-button col-2"
-                                        onClick={closeSearch}
+                                        onClick={() => {
+                                            closeSearch(file);
+                                        }}
                                     >
                                         <FontAwesomeIcon
                                             icon={faTimes}
