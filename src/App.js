@@ -20,11 +20,6 @@ function App() {
     const [searchedFiles, setSearchedFiles] = useState([]); // 被搜索的数组，files数组被很多场景依赖，这里需要翻出抽取出来进行展示或者过滤
     const filesArray = objToArr(files);
 
-    const updateFileContent = (id, updateProps) => {
-        const newFile = { ...files[id], ...updateProps };
-
-        setFiles({ ...files, [id]: newFile });
-    };
     const fileClick = (id) => {
         // 1. 将激活的id设置为当前的id
         // 2. 将editor打开，展示当前激活id的内容
@@ -49,9 +44,9 @@ function App() {
         }
     };
     const fileChange = (id, value) => { // 1. update the active file body // 2. update the unsavedFiles
-        updateFileContent(id, {
-            body: value
-        });
+        const newFile = { ...files[id], body: value };
+
+        setFiles({ ...files, [id]: newFile });
 
         if (!unsavedFileIDs.includes(id)) {
             setUnsavedFileIDs([...unsavedFileIDs, id]);
@@ -60,24 +55,21 @@ function App() {
     const activeFile = files[activeFileId];
 
     const deleteFile = (id) => {
-        const newFiles = files.filter(file => file.id !== id);
+        const newFiles = filesArray.filter(file => file.id !== id);
         setFiles(newFiles);
         // close tab if open
         tabClose(id);
     };
 
     const updateFileName = (id, title) => {
-        updateFileContent(id, {
-            title,
-            isNew: false
-        });
+        const modifiedFile = { ...files[id], isNew: false, title };
+        setFiles({ ...files, [id]: modifiedFile });
     };
 
     const fileSearch = (keyword) => {
         // filter out the new files based on the keyword
         // 如果这里的keyword输入为空，那么includes判断会判断files中每一个都含有空字符串，自然就会展示全量列表了
         const newFiles = filesArray.filter(file => file.title.includes(keyword));
-        console.log('newFiles', newFiles); // eslint-disable-line
         setSearchedFiles(newFiles);
     };
     // 当搜索的内容不为空的时候，就显示搜索列表否则显示默认的文件列表
@@ -96,7 +88,6 @@ function App() {
             createAt: Date.now(),
             isNew: true,
         }
-        console.log({newFiles}); // eslint-disable-line
         setFiles({ ...files, [newId]: newFile });
     };
     return (
