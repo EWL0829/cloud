@@ -10,11 +10,12 @@ app.on('ready', () => {
         // Settings of web page's features
         webPreferences: {
             // 在这个主进程内部的渲染进程可以使用Node
-            nodeIntegration: true
-        }
+            nodeIntegration: true,
+            enableRemoteModule: true,
+        },
     });
 
-    const urlLocation = isDev ? 'http://localhost:3000' : 'dummy';
+    const urlLocation = isDev ? 'http://localhost:3006' : 'dummy';
     mainWindow.loadURL(urlLocation);
     mainWindow.webContents.openDevTools({
         mode: "bottom"
