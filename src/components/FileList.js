@@ -43,7 +43,7 @@ export default function FileList({ files, onFileClick, onSaveEdit, onFileDelete 
 
         // 添加trim的原因在于空值不允许保存
         if (isEnterPressed && curEditId && value.trim() !== '') {
-            onSaveEdit(curEditItem.id, value);
+            onSaveEdit(curEditItem.id, value, curEditItem.isNew);
             setCurEditId(''); // 将当前修改项改回默认值，离开编辑状态
             setValue(''); // 将输入框内的内容改为空值
         }
@@ -65,7 +65,7 @@ export default function FileList({ files, onFileClick, onSaveEdit, onFileDelete 
                             key={id}
                         >
                             {
-                                (curEditId !== id || !isNew) ? <>
+                                (curEditId !== id && !isNew) && <>
                                     <span className="col-2">
                                 <FontAwesomeIcon
                                     icon={faMarkdown}
@@ -98,7 +98,12 @@ export default function FileList({ files, onFileClick, onSaveEdit, onFileDelete 
                                             title="删除"
                                         />
                                     </button>
-                                </> : <>
+                                </>
+                            }
+                            {
+                                // 命中当前编辑的id或者是新创建的file
+                                (curEditId === id || isNew) &&
+                                <>
                                     <input
                                         type="text"
                                         className="form-control col-10"

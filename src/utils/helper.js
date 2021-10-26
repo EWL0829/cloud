@@ -8,5 +8,6 @@ export const flattenArr = (arr) => {
 };
 
 export const objToArr = (obj) => {
+    if (!obj) return [];
     return Object.keys(obj).map(key => obj[key]);
 };

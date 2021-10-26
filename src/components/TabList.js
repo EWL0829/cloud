@@ -8,7 +8,7 @@ import './TabList.scss';
 
 TabList.propTypes = {
     files: PropTypes.array,
-    activeId: PropTypes.number,
+    activeId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]), // 使用uuid时变成了string类型
     unsavedIds: PropTypes.array,
     onTabClick: PropTypes.func,
     onCloseTab: PropTypes.func

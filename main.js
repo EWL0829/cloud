@@ -1,7 +1,9 @@
 const { app, BrowserWindow } = require('electron');
 const isDev = require('electron-is-dev');
+const Store = require('electron-store');
 
 let mainWindow;
+Store.initRenderer();
 
 app.on('ready', () => {
     mainWindow = new BrowserWindow({
@@ -15,10 +17,10 @@ app.on('ready', () => {
         },
     });
 
-    const urlLocation = isDev ? 'http://localhost:3006' : 'dummy';
+    const urlLocation = isDev ? 'http://localhost:3123' : 'dummy';
     mainWindow.loadURL(urlLocation);
     mainWindow.webContents.openDevTools({
-        mode: "bottom"
+        mode: "detach"
     });
 });
 app.on('window-all-closed', () => {
